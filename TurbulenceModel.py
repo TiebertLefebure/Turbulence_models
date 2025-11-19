@@ -1,6 +1,11 @@
 from dolfin import *
 from Utilities import *
 
+
+############################
+# k-epsilon turbulence model
+############################
+
 class KEpsilonGeneral:
     def __init__(self, K, bck, bce, k_init, e_init, nu, force, custom_dx, custom_ds, distance_field):
         # K-epsilon model parameters
@@ -136,3 +141,111 @@ class KEpsilonTransient(KEpsilonGeneral):
             - dot(self._prod_e, self._psi)*self._dx \
             + dot(self._react_e * self._e, self._psi)*self._dx
         self._a_e = lhs(FE); self._l_e = rhs(FE)
+
+
+
+###################################
+# Spalart-Allmaras turbulence model
+###################################
+
+class SpalartAllmarasGeneral:
+    def __init__(self, N, bcn, nu_tilde_init, nu, force, custom_dx, custom_ds, distance_field):
+        self._N = N
+        self._bcn = bcn
+        self._nu_tilde_init = nu_tilde_init
+
+        self._nu = nu
+        self._force = force
+        self._dx = custom_dx
+        self._ds = custom_ds
+        self._y = distance_field
+
+        self._construct_functions()
+
+    def _construct_functions(self):
+        self._nu_tilde, self._xi, self._nu_tilde1, self._nu_tilde0 = initialize_functions(self._N, Constant(self._nu_tilde_init))
+
+    def construct_forms(self):
+        raise NotImplementedError("This method must be implemented in subclasses.")
+
+    def solve_turbulence_model(self):
+        A_NT = assemble(self._a_nt); b_nt = assemble(self._l_nt)
+        [bc.apply(A_NT,b_nt) for bc in self._bcn]
+        solve(A_NT, self._nu_tilde1.vector(), b_nt)
+
+        self._nu_tilde1 = bound_from_bellow(self._nu_tilde1, 1e-16)
+
+    def update_variables(self, relaxation = 1.0):
+        self._nu_tilde0.assign(relaxation * self._nu_tilde1 + (1.0 - relaxation) * self._nu_tilde0)
+
+    def _construct_turbulent_quantities(self, external_u1):
+        chi = self._nu_tilde0 / self._nu
+        f_v1 = (chi**3) / (chi**3 + Constant(7.1)**3)
+        f_v2 = 1 - chi / (1 + chi * f_v1)
+
+        S_sq = 2 * inner(sym(nabla_grad(external_u1)), sym(nabla_grad(external_u1)))
+        S = sqrt(S_sq)
+
+        S_tilde = S + self._nu_tilde0 / (0.41**2 * self._y**2 + DOLFIN_EPS) * f_v2
+
+        r = self._nu_tilde0 / (S_tilde * 0.41**2 * self._y**2 + DOLFIN_EPS)
+        g = r + 0.3 * (r**6 - r)
+        f_w = g * ((1 + 2.0**6) / (g**6 + 2.0**6))**(1.0/6.0)
+
+        f_t2 = 1.2 * exp(-0.5 * chi**2)
+
+        self._nu_t = self._nu_tilde0 * f_v1
+
+        sigma = 2.0/3.0
+        cb1 = 0.1355
+        cb2 = 0.622
+        cw1 = cb1/0.41**2 + (1 + cb2)/sigma
+
+        self._react_nt = -cb1 * (1 - f_t2) * S_tilde
+        self._src_nt = (cb2/sigma) * inner(nabla_grad(self._nu_tilde0), nabla_grad(self._nu_tilde0)) - cw1 * f_w * (self._nu_tilde0 / (self._y + DOLFIN_EPS))**2
+
+    @property
+    def nu_t(self):
+        return self._nu_t
+
+    @property
+    def nu_tilde0(self):
+        return self._nu_tilde0
+
+    @property
+    def nu_tilde1(self):
+        return self._nu_tilde1
+
+
+class SpalartAllmarasSteadyState(SpalartAllmarasGeneral):
+    def __init__(self, N, bcn, nu_tilde_init, nu, force, custom_dx, custom_ds, distance_field):
+        super().__init__(N, bcn, nu_tilde_init, nu, force, custom_dx, custom_ds, distance_field)
+
+    def construct_forms(self, external_u1):
+        self._construct_turbulent_quantities(external_u1)
+
+        sigma = 2.0/3.0
+
+        FNT  = dot(dot(external_u1, nabla_grad(self._nu_tilde)), self._xi)*self._dx \
+            + inner((self._nu + self._nu_tilde0) / sigma * grad(self._nu_tilde), grad(self._xi))*self._dx \
+            - dot(self._src_nt, self._xi)*self._dx \
+            + dot(self._react_nt * self._nu_tilde, self._xi)*self._dx
+        self._a_nt = lhs(FNT); self._l_nt = rhs(FNT)
+
+
+class SpalartAllmarasTransient(SpalartAllmarasGeneral):
+    def __init__(self, N, bcn, nu_tilde_init, nu, force, custom_dx, custom_ds, dt, distance_field):
+        self._dt = dt
+        super().__init__(N, bcn, nu_tilde_init, nu, force, custom_dx, custom_ds, distance_field)
+
+    def construct_forms(self, external_u1):
+        self._construct_turbulent_quantities(external_u1)
+
+        sigma = 2.0/3.0
+
+        FNT  = dot((self._nu_tilde - self._nu_tilde0) / self._dt, self._xi)*self._dx \
+            + dot(dot(external_u1, nabla_grad(self._nu_tilde)), self._xi)*self._dx \
+            + inner((self._nu + self._nu_tilde0) / sigma * grad(self._nu_tilde), grad(self._xi))*self._dx \
+            - dot(self._src_nt, self._xi)*self._dx \
+            + dot(self._react_nt * self._nu_tilde, self._xi)*self._dx
+        self._a_nt = lhs(FNT); self._l_nt = rhs(FNT)

@@ -18,7 +18,8 @@ initial_conditions = {
     'U': (20.0, 0.0),
     'P': 2.0,
     'K': 1.5,
-    'E': 2.23
+    'E': 2.23,
+    'NU_TILDE': 1e-6
 }
 
 # Boundary conditions
@@ -27,25 +28,29 @@ boundary_conditions = {
         'U': None,
         'P': 2.0,
         'K': None,
-        'E': None
+        'E': None,
+        'NU_TILDE': None
     },
     'OUTFLOW':{
         'U': None,
         'P': 0.0,
         'K': None,
-        'E': None
+        'E': None,
+        'NU_TILDE': None
     },
     'WALLS':{
         'U': (0.0, 0.0),
         'P': None,
         'K': 0.0,
-        'E': None
+        'E': None,
+        'NU_TILDE': 0.0
     },
     'SYMMETRY':{
         'U': None,
         'P': None,
         'K': None,
-        'E': None
+        'E': None,
+        'NU_TILDE': None
     }
 }
 
@@ -64,11 +69,19 @@ simulation_prm = {
     'CFL_RELAXATION': 0.25
 }
 
-# Specify where results are saved
+# Specify where results are saved for k-epsilon runs
 saving_directory = {
-    'PVD_FILES': 'Results/Channel/PVD files/',
-    'H5_FILES':  'Results/Channel/H5 files/',
-    'RESIDUALS': 'Results/Channel/Residual files/'
+    'PVD_FILES': 'Results/Channel_k-epsilon/PVD files/',
+    'H5_FILES':  'Results/Channel_k-epsilon/H5 files/',
+    'RESIDUALS': 'Results/Channel_k-epsilon/Residual files/'
+}
+
+# Dedicated saving directories for SA runs
+saving_directory_SA = {
+    'PVD_FILES': 'Results/Channel_SA/PVD files/',
+    'H5_FILES':  'Results/Channel_SA/H5 files/',
+    'RESIDUALS': 'Results/Channel_SA/Residual files/',
+    'FIGURES':   'Results/Channel_SA/Figures/'
 }
 
 # Specify what to do after simulation

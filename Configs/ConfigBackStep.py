@@ -63,7 +63,7 @@ simulation_prm = {
     'PICARD_RELAXATION': 0.1
 }
 
-# Specify where results are saved
+# Specify where results are saved for k-epsilon runs
 saving_directory = {
     'PVD_FILES': 'Results/BackStep/PVD files/',
     'H5_FILES':  'Results/BackStep/H5 files/',
