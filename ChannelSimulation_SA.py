@@ -14,6 +14,7 @@ import os
 quadrature_degree = simulation_prm['QUADRATURE_DEGREE']
 dx = Measure("dx", domain=mesh, metadata={"quadrature_degree": quadrature_degree})
 ds = Measure("ds", domain=mesh, metadata={"quadrature_degree": quadrature_degree})
+ds_m = Measure("ds", domain=mesh, subdomain_data=marked_facets, metadata={"quadrature_degree": quadrature_degree})
 
 # Construct periodic boundary condition
 mesh_width  = mesh.coordinates()[:, 0].max() - mesh.coordinates()[:, 0].min()
@@ -62,7 +63,7 @@ y = Expression('H/2 - abs(H/2 - x[1])', H=height, degree=2)
 u, v, u1, u0 = initialize_functions(V, Constant(initial_conditions['U']))
 p, q, p1, p0 = initialize_functions(Q, Constant(initial_conditions['P']))
 
-# Initialize turbulence model (use 'K' initial condition as nu_tilde initial)
+# Initialize turbulence model
 turbulence_model = SA(N, bcn, initial_conditions['NU_TILDE'], nu, force, dx, ds, dt, y)
 turbulence_model.construct_forms(u1)
 
@@ -129,6 +130,30 @@ for iter in range(simulation_prm['MAX_ITERATIONS']):
         break
 
 solutions = {'u': u1, 'p': p1, 'nu_tilde': turbulence_model.nu_tilde1}
+
+# Mass flow check
+n = FacetNormal(mesh)
+def _sum_over(markers):
+    if markers is None:
+        return 0.0
+    total = 0.0
+    for m in markers:
+        total += assemble(dot(u1, n) * ds_m(m))
+    return total
+def _area_over(markers):
+    if markers is None:
+        return 0.0
+    total = 0.0
+    for m in markers:
+        total += assemble(1.0 * ds_m(m))
+    return total
+flux_in  = _sum_over(boundary_markers.get('INFLOW'))
+flux_out = _sum_over(boundary_markers.get('OUTFLOW'))
+area_in  = _area_over(boundary_markers.get('INFLOW'))
+area_out = _area_over(boundary_markers.get('OUTFLOW'))
+net_flux = flux_in + flux_out
+rel_imb  = abs(net_flux) / (abs(flux_in) + abs(flux_out) + DOLFIN_EPS)
+print(f'Mass flow check: inflow={flux_in:.6e}, outflow={flux_out:.6e}, net={net_flux:.6e}, rel={rel_imb:.3e}, Ubar_in={flux_in/(area_in + DOLFIN_EPS):.6e}, Ubar_out={flux_out/(area_out + DOLFIN_EPS):.6e}')
 
 # Visualize
 if post_processing['PLOT']==True:
@@ -229,3 +254,10 @@ if post_processing['SAVE']==True:
 
     for (key, f) in residuals.items():
         save_list(f, saving_directory_SA['RESIDUALS'] + key + '.txt')
+    with open(os.path.join(saving_directory_SA['RESIDUALS'], 'mass_flow.txt'), 'w') as f:
+        f.write(f'inflow_flux {flux_in:.16e}\n')
+        f.write(f'outflow_flux {flux_out:.16e}\n')
+        f.write(f'net_flux {net_flux:.16e}\n')
+        f.write(f'rel_imbalance {rel_imb:.16e}\n')
+        f.write(f'area_in {area_in:.16e}\n')
+        f.write(f'area_out {area_out:.16e}\n')
