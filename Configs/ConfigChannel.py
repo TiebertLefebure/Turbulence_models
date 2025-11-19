@@ -15,7 +15,7 @@ boundary_markers = {
 
 # Initial conditions
 initial_conditions = {
-    'U': (5.0, 0.0), # [m/s]
+    'U': (5.0, 0.0), # initially: 20.0 m/s
     'P': 2.0,
     'K': 1.5,
     'E': 2.23,
@@ -64,9 +64,9 @@ physical_prm = {
 # Simulation parameters
 simulation_prm = {
     'QUADRATURE_DEGREE': 2,
-    'MAX_ITERATIONS': 5000,
+    'MAX_ITERATIONS': 5000, # initially: 3000
     'TOLERANCE': 1e-6,
-    'CFL_RELAXATION': 0.10
+    'CFL_RELAXATION': 0.10 # initially: 0.25
 }
 
 # Specify where results are saved for k-epsilon runs
