@@ -64,10 +64,10 @@ physical_prm = {
 # Simulation parameters
 simulation_prm = {
     'QUADRATURE_DEGREE': 2,
-    'MAX_ITERATIONS': 10000, # initially: 3000
+    'MAX_ITERATIONS': 15000, # initially: 3000
     'TOLERANCE': 1e-6,
     'VELOCITY_TOLERANCE': 1e-3, # initially 1e-6, relaxed for SA
-    'CFL_RELAXATION': 0.25 # initially: 0.25
+    'CFL_RELAXATION': 0.10 # initially: 0.25
 }
 
 # Specify where results are saved for k-epsilon runs

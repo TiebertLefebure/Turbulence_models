@@ -6,7 +6,7 @@ import os
 
 # ------------- Utilities for checking convergence  ------------- #
 
-def compute_l2_error(f1, f0):
+def _compute_l2_error(f1, f0):
     '''Compute rms L2 error of two functions: f1, f0''' 
     error = f1 - f0
     mesh = f1.function_space().mesh()
