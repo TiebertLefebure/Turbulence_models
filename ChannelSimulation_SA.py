@@ -111,9 +111,9 @@ for iter in range(simulation_prm['MAX_ITERATIONS']):
     turbulence_model.solve_turbulence_model()
 
     errors = [
-        _compute_l2_error(u1, u0),
-        _compute_l2_error(p1, p0),
-        _compute_l2_error(turbulence_model.nu_tilde1, turbulence_model.nu_tilde0)
+        compute_l2_error(u1, u0),
+        compute_l2_error(p1, p0),
+        compute_l2_error(turbulence_model.nu_tilde1, turbulence_model.nu_tilde0)
     ]
     tolerances = [vel_tolerance, default_tolerance, default_tolerance]
     break_flag = all(err <= tol for err, tol in zip(errors, tolerances))

@@ -6,7 +6,7 @@ import os
 
 # ------------- Utilities for checking convergence  ------------- #
 
-def _compute_l2_error(f1, f0):
+def compute_l2_error(f1, f0):
     '''Compute rms L2 error of two functions: f1, f0''' 
     error = f1 - f0
     mesh = f1.function_space().mesh()
@@ -18,7 +18,7 @@ def _compute_l2_error(f1, f0):
 
 def _are_close(f1, f0, tol):
     '''Check if two functions: f1, f0 are sufficiently (tol) close'''
-    error = _compute_l2_error(f1, f0)
+    error = compute_l2_error(f1, f0)
     if error <= tol:
         return True, error
     else:
