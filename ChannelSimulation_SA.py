@@ -70,9 +70,10 @@ turbulence_model.construct_forms(u1)
 # Construct RANS forms
 F1  = dot((u - u0) / dt, v)*dx \
     + dot(dot(u0, nabla_grad(u)), v)*dx \
-    + inner((nu + turbulence_model.nu_t) * grad(u), grad(v))*dx \
+    + inner((nu + turbulence_model.nu_t) * grad(u), grad(v))*dx \ 
     - dot(force, v)*dx
-
+# turbulence-model.nu_t is added to momentum equations
+# determined by turbulence model
 F2  = dot(grad(p), grad(q))*dx + dot(div(u1) / dt, q)*dx
 F3  = dot(u, v)*dx - dot(u1, v)*dx + dt * dot(grad(p1), v)*dx
 
@@ -109,7 +110,8 @@ for iter in range(simulation_prm['MAX_ITERATIONS']):
 
     # Solve turbulence model
     turbulence_model.solve_turbulence_model()
-
+    # solve transport equation for nu_tilde (turbulent kinematic eddy viscosity)
+   
     errors = [
         compute_l2_error(u1, u0),
         compute_l2_error(p1, p0),
