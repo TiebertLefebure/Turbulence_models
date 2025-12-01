@@ -15,7 +15,7 @@ boundary_markers = {
 
 # Initial conditions
 initial_conditions = {
-    'U': (20.0, 0.0), # initially: 20.0 m/s
+    'U': (20.0, 0.0), 
     'P': 2.0,
     'K': 1.5,
     'E': 2.23,
