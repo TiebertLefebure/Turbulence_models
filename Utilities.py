@@ -6,32 +6,15 @@ import os
 
 # ------------- Utilities for checking convergence  ------------- #
 
-def compute_l2_error(f1, f0):
-    '''Compute rms L2 error of two functions/expressions: f1, f0''' 
+def _compute_l2_error(f1, f0):
+    '''Compute l2 error of two functions: f1, f0''' 
     error = f1 - f0
-    mesh = None
-    for f in (f1, f0, error):
-        if hasattr(f, "function_space"):
-            mesh = f.function_space().mesh()
-            break
-        domain = getattr(f, "ufl_domain", lambda: None)()
-        if domain is not None:
-            mesh = getattr(domain, "ufl_cargo", lambda: None)()
-            if mesh is not None:
-                break
-    if mesh is None:
-        raise ValueError("Cannot determine mesh for L2 error calculation.")
-
-    dx_local = Measure("dx", domain=mesh)
-    domain_measure = assemble(Constant(1.0) * dx_local)
-    error_sq = inner(error, error)
-    error_val = assemble(error_sq * dx_local)
-    rms_error = np.sqrt((error_val / (domain_measure + DOLFIN_EPS)) + DOLFIN_EPS)
-    return rms_error
+    error = assemble(error**2*dx)
+    return error
 
 def _are_close(f1, f0, tol):
     '''Check if two functions: f1, f0 are sufficiently (tol) close'''
-    error = compute_l2_error(f1, f0)
+    error = _compute_l2_error(f1, f0)
     if error <= tol:
         return True, error
     else:

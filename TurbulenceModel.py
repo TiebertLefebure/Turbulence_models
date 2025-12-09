@@ -4,10 +4,10 @@ from Utilities import *
 
 
 
+#####################################
+### Lam-Bremhorst k-epsilon model ###
+#####################################
 
-############################
-# k-epsilon turbulence model
-############################
 
 class KEpsilonGeneral:
     def __init__(self, K, bck, bce, k_init, e_init, nu, force, custom_dx, custom_ds, distance_field):
@@ -148,7 +148,6 @@ class KEpsilonTransient(KEpsilonGeneral):
 
 
 
-
 ###################################
 # Spalart-Allmaras turbulence model
 ###################################
@@ -202,7 +201,7 @@ class SpalartAllmarasGeneral:
         self._nu_t = self._nu_tilde0 * f_v1
 
         sigma = 2.0/3.0
-        cb1 = 0.1355
+        cb1 = 0.1355 # initially: cb1 = 0.1355
         cb2 = 0.622
         cw1 = cb1/0.41**2 + (1 + cb2)/sigma
 

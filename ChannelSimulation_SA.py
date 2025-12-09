@@ -42,26 +42,31 @@ for boundary_name, markers in boundary_markers.items():
         # Velocity BC
         cond_u = boundary_conditions[boundary_name].get('U')
         if cond_u is not None:
-            bcu.append(DirichletBC(V, cond_u, marked_facets, marker))
+            bc_u = format_value_for_space(V, cond_u)
+            bcu.append(DirichletBC(V, bc_u, marked_facets, marker))
         # Pressure BC
         cond_p = boundary_conditions[boundary_name].get('P')
         if cond_p is not None:
-            bcp.append(DirichletBC(Q, cond_p, marked_facets, marker))
+            bc_p = format_value_for_space(Q, cond_p)
+            bcp.append(DirichletBC(Q, bc_p, marked_facets, marker))
         # SA model: reuse 'K' entry for nu_tilde BCs (e.g., 0 at walls)
         cond_nt = boundary_conditions[boundary_name].get('NU_TILDE')
         if cond_nt is not None:
-            bcn.append(DirichletBC(N, cond_nt, marked_facets, marker))
+            bc_nt = format_value_for_space(N, cond_nt)
+            bcn.append(DirichletBC(N, bc_nt, marked_facets, marker))
 
 # Initialize constants and expressions
 nu = Constant(physical_prm['VISCOSITY'])
-force = Constant(physical_prm['FORCE'])
+force = format_value_for_space(V, physical_prm['FORCE'])
 dt = Constant(physical_prm['STEP_SIZE'])
 height = mesh.coordinates()[:, 1].max() - mesh.coordinates()[:, 1].min()
 y = Expression('H/2 - abs(H/2 - x[1])', H=height, degree=2)
 
 # Initialize functions
-u, v, u1, u0 = initialize_functions(V, Constant(initial_conditions['U']))
-p, q, p1, p0 = initialize_functions(Q, Constant(initial_conditions['P']))
+u_init = format_value_for_space(V, initial_conditions['U'])
+p_init = format_value_for_space(Q, initial_conditions['P'])
+u, v, u1, u0 = initialize_functions(V, u_init)
+p, q, p1, p0 = initialize_functions(Q, p_init)
 
 # Initialize turbulence model
 turbulence_model = SA(N, bcn, initial_conditions['NU_TILDE'], nu, force, dx, ds, dt, y)
@@ -72,6 +77,7 @@ F1  = dot((u - u0) / dt, v)*dx \
     + dot(dot(u0, nabla_grad(u)), v)*dx \
     + inner((nu + turbulence_model.nu_t) * grad(u), grad(v))*dx \
     - dot(force, v)*dx
+    
 F2  = dot(grad(p), grad(q))*dx + dot(div(u1) / dt, q)*dx
 F3  = dot(u, v)*dx - dot(u1, v)*dx + dt * dot(grad(p1), v)*dx
 
@@ -92,10 +98,12 @@ for iter in range(simulation_prm['MAX_ITERATIONS']):
         h_x = MaxCellEdgeLength(mesh); h_y = MinCellEdgeLength(mesh)
         step_size = calculate_cfl_time_step(u0, h_x, h_y, simulation_prm['CFL_RELAXATION'], mesh)
         dt.assign(Constant(step_size))
+        # Calculate maximum CFL number
         u_x = u0[0]
         u_y = u0[1]
-        cfl = step_size * (abs(u_x) / h_x + abs(u_y) / h_y)
-        print(f"CFL number: {cfl:.2f}")
+        cfl_expr = step_size * (abs(u_x) / h_x + abs(u_y) / h_y)
+        cfl_max = project(cfl_expr, FunctionSpace(mesh, "DG", 0)).vector().max()
+        print(f"CFL number: {cfl_max:.2f}")
 
     # Solve NS
     A_1 = assemble(a_1); b_1 = assemble(l_1)
@@ -114,10 +122,13 @@ for iter in range(simulation_prm['MAX_ITERATIONS']):
     turbulence_model.solve_turbulence_model()
     
     # Apply relaxation for better convergence
-    relaxation = 0.7  # Can be adjusted between 0.5-0.9
-    u1.vector()[:] = relaxation * u1.vector() + (1 - relaxation) * u0.vector()
-    p1.vector()[:] = relaxation * p1.vector() + (1 - relaxation) * p0.vector()
-    turbulence_model.update_variables(relaxation)
+    #relaxation = 0.9  # Less aggressive relaxation
+    #u1.vector()[:] = relaxation * u1.vector() + (1 - relaxation) * u0.vector()
+    #p1.vector()[:] = relaxation * p1.vector() + (1 - relaxation) * p0.vector()
+    #turbulence_model.update_variables(relaxation)
+
+    # No relaxation - let solution converge naturally
+    # u1, p1, and turbulence_model already have the computed values
    
     errors = [
         compute_l2_error(u1, u0),
@@ -189,4 +200,3 @@ if post_processing['SAVE']==True:
     for (key, f) in residuals.items():
         save_list(f, saving_directory_SA['RESIDUALS'] + key + '.txt')
    
-

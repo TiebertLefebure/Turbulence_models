@@ -74,8 +74,6 @@ a_3, l_3 = lhs(F3), rhs(F3)
 # Main loop
 residuals = {key: [] for key in ['u', 'p', 'k', 'e']}
 start_time = time.time()
-vel_tolerance = simulation_prm.get('VELOCITY_TOLERANCE', simulation_prm['TOLERANCE'])
-default_tolerance = simulation_prm['TOLERANCE']
 for iter in range(simulation_prm['MAX_ITERATIONS']):
     # Dynamic time-stepping
     if iter > 0:
@@ -99,21 +97,14 @@ for iter in range(simulation_prm['MAX_ITERATIONS']):
     # Solve turbulence model
     turbulence_model.solve_turbulence_model()
 
-    errors = [
-        compute_l2_error(u1, u0),
-        compute_l2_error(p1, p0),
-        compute_l2_error(turbulence_model.k1, turbulence_model.k0),
-        compute_l2_error(turbulence_model.e1, turbulence_model.e0)
-    ]
-    tolerances = [vel_tolerance, default_tolerance, default_tolerance, default_tolerance]
-    break_flag = all(err <= tol for err, tol in zip(errors, tolerances))
+    break_flag, errors = are_close_all([u1,p1,turbulence_model.k1, turbulence_model.e1], 
+                                       [u0,p0,turbulence_model.k0, turbulence_model.e0], 
+                                       simulation_prm['TOLERANCE'])
 
   # Update residuals and print summary
     print(f'iter: {iter+1} ({time.time() - start_time:.2f}s) - L2 errors: '
-          f'|u1-u0|= {errors[0]:.2e} (required: {tolerances[0]:.2e}), '
-          f'|p1-p0|= {errors[1]:.2e} (required: {tolerances[1]:.2e}), '
-          f'|k1-k0|= {errors[2]:.2e} (required: {tolerances[2]:.2e}), '
-          f'|e1-e0|= {errors[3]:.2e} (required: {tolerances[3]:.2e})')
+          f'|u1-u0|= {errors[0]:.2e}, |p1-p0|= {errors[1]:.2e}, '
+          f'|k1-k0|= {errors[2]:.2e}, |e1-e0|= {errors[3]:.2e} (required: {simulation_prm["TOLERANCE"]:.2e})')
 
     for key, error in zip(residuals.keys(), errors):
         residuals[key].append(error)

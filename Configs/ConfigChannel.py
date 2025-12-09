@@ -15,11 +15,10 @@ boundary_markers = {
 
 # Initial conditions
 initial_conditions = {
-    'U': (20.0, 0.0), 
+    'U': (20.0, 0.0),
     'P': 2.0,
     'K': 1.5,
-    'E': 2.23,
-    'NU_TILDE': 0.01
+    'E': 2.23
 }
 
 # Boundary conditions
@@ -28,35 +27,31 @@ boundary_conditions = {
         'U': None,
         'P': 2.0,
         'K': None,
-        'E': None,
-        'NU_TILDE': None
+        'E': None
     },
     'OUTFLOW':{
         'U': None,
         'P': 0.0,
         'K': None,
-        'E': None,
-        'NU_TILDE': None
+        'E': None
     },
     'WALLS':{
         'U': (0.0, 0.0),
         'P': None,
         'K': 0.0,
-        'E': None,
-        'NU_TILDE': 0.0
+        'E': None
     },
     'SYMMETRY':{
         'U': None,
         'P': None,
         'K': None,
-        'E': None,
-        'NU_TILDE': None
+        'E': None
     }
 }
 
 # Physical quantities
 physical_prm = {
-    'VISCOSITY': 0.00181818, # kinematic viscosity [m^2/s]
+    'VISCOSITY': 0.00181818,
     'FORCE': (0.0, 0.0),
     'STEP_SIZE': 0.005
 }
@@ -64,24 +59,16 @@ physical_prm = {
 # Simulation parameters
 simulation_prm = {
     'QUADRATURE_DEGREE': 2,
-    'MAX_ITERATIONS': 15000, # initially: 3000 
+    'MAX_ITERATIONS': 3000,
     'TOLERANCE': 1e-6,
-    'VELOCITY_TOLERANCE': 1e-6, # initially 1e-6, relaxed for SA
-    'CFL_RELAXATION': 0.10 # initially: 0.25
+    'CFL_RELAXATION': 0.25
 }
 
-# Specify where results are saved for k-epsilon runs
+# Specify where results are saved
 saving_directory = {
-    'PVD_FILES': 'Results/Channel_k-epsilon/PVD_files/',
-    'H5_FILES':  'Results/Channel_k-epsilon/H5_files/',
-    'RESIDUALS': 'Results/Channel_k-epsilon/Residual_files/'
-}
-
-# Dedicated saving directories for SA runs
-saving_directory_SA = {
-    'PVD_FILES': 'Results/Channel_SA/PVD_files/',
-    'H5_FILES':  'Results/Channel_SA/H5_files/',
-    'RESIDUALS': 'Results/Channel_SA/Residual_files/',
+    'PVD_FILES': 'Results/Channel/PVD files/',
+    'H5_FILES':  'Results/Channel/H5 files/',
+    'RESIDUALS': 'Results/Channel/Residual files/'
 }
 
 # Specify what to do after simulation
