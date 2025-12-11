@@ -18,7 +18,8 @@ initial_conditions = {
     'U': (20.0, 0.0),
     'P': 2.0,
     'K': 1.5,
-    'E': 2.23
+    'E': 2.23,
+    'NU_TILDE': 1e-5
 }
 
 # Boundary conditions
@@ -39,7 +40,8 @@ boundary_conditions = {
         'U': (0.0, 0.0),
         'P': None,
         'K': 0.0,
-        'E': None
+        'E': None,
+        'NU_TILDE': 0.0
     },
     'SYMMETRY':{
         'U': None,
@@ -69,6 +71,13 @@ saving_directory = {
     'PVD_FILES': 'Results/Channel/PVD files/',
     'H5_FILES':  'Results/Channel/H5 files/',
     'RESIDUALS': 'Results/Channel/Residual files/'
+}
+
+# Specify where SA results are saved
+saving_directory_SA = {
+    'PVD_FILES': 'Results/Channel_SA/PVD files/',
+    'H5_FILES':  'Results/Channel_SA/H5 files/',
+    'RESIDUALS': 'Results/Channel_SA/Residual files/'
 }
 
 # Specify what to do after simulation

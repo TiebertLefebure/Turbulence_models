@@ -137,12 +137,13 @@ if __name__ == "__main__":
     create_mesh("u_bend_2d.msh")
 
 
-# 1) u_tube_gmsh.py
+### (1) u_tube_gmsh.py ###
 
-# INPUT 
+### INPUT ### 
 
+# cd /Users/tiebertlefebure/Documents/FEniCS-Tiebert/Turbulence_models/Meshes/PipeBend/Coarse
 # python3 u_tube_gmsh.py
 
-# OUTPUT
+### OUTPUT ###
 
 # "Wrote coarse mesh: u_bend_2d.msh"

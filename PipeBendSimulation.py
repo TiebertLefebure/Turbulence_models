@@ -126,9 +126,9 @@ if post_processing['SAVE']==True:
 
 
 
-# PipeBendSimulation.py
+### PipeBendSimulation.py ###
 
-# INPUT
+### INPUT ###
 
 # cd /Users/tiebertlefebure/Documents/FEniCS-Tiebert/Turbulence_models/
 
@@ -141,4 +141,4 @@ if post_processing['SAVE']==True:
 
 
 
-# OUTPUT
+### OUTPUT ###

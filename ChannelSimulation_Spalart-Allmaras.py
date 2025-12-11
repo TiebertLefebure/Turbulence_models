@@ -49,7 +49,7 @@ for boundary_name, markers in boundary_markers.items():
         if cond_p is not None:
             bc_p = format_value_for_space(Q, cond_p)
             bcp.append(DirichletBC(Q, bc_p, marked_facets, marker))
-        # SA model: reuse 'K' entry for nu_tilde BCs (e.g., 0 at walls)
+        # SA model: nu_tilde BCs (e.g., 0 at walls)
         cond_nt = boundary_conditions[boundary_name].get('NU_TILDE')
         if cond_nt is not None:
             bc_nt = format_value_for_space(N, cond_nt)
@@ -130,20 +130,15 @@ for iter in range(simulation_prm['MAX_ITERATIONS']):
     # No relaxation - let solution converge naturally
     # u1, p1, and turbulence_model already have the computed values
    
-    errors = [
-        compute_l2_error(u1, u0),
-        compute_l2_error(p1, p0),
-        compute_l2_error(turbulence_model.nu_tilde1, turbulence_model.nu_tilde0)
-    ]
-    tolerances = [vel_tolerance, default_tolerance, default_tolerance]
-    break_flag = all(err <= tol for err, tol in zip(errors, tolerances))
+    break_flag, errors = are_close_all([u1, p1, turbulence_model.nu_tilde1],
+                                       [u0, p0, turbulence_model.nu_tilde0],
+                                       simulation_prm['TOLERANCE'])
     converged = break_flag
 
     # Update residuals and print summary
     print(f'iter: {iter+1} ({time.time() - start_time:.2f}s) - L2 errors: '
-          f'|u1-u0|= {errors[0]:.2e} (required: {tolerances[0]:.2e}), '
-          f'|p1-p0|= {errors[1]:.2e} (required: {tolerances[1]:.2e}), '
-          f'|nu_tilde1-nu_tilde0|= {errors[2]:.2e} (required: {tolerances[2]:.2e})')
+          f'|u1-u0|= {errors[0]:.2e}, |p1-p0|= {errors[1]:.2e}, '
+          f'|nu_tilde1-nu_tilde0|= {errors[2]:.2e} (required: {simulation_prm["TOLERANCE"]:.2e})')
 
     for key, error in zip(residuals.keys(), errors):
         residuals[key].append(error)
@@ -200,3 +195,20 @@ if post_processing['SAVE']==True:
     for (key, f) in residuals.items():
         save_list(f, saving_directory_SA['RESIDUALS'] + key + '.txt')
    
+
+### ChannelSimulation_Spalart-Allmaras.py ###
+
+### INPUT ###
+
+# cd /Users/tiebertlefebure/Documents/FEniCS-Tiebert/Turbulence_models/
+
+# docker run -ti --rm \
+#   -v "$(pwd)":/home/fenics/shared \
+#   -w /home/fenics/shared \
+#   quay.io/fenicsproject/stable:current
+
+# python3 ChannelSimulation_Spalart-Allmaras.py
+
+
+
+### OUTPUT ###
