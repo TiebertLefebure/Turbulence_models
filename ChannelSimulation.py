@@ -44,7 +44,7 @@ for boundary_name, markers in boundary_markers.items():
 # Initialize constants and expressions
 nu = Constant(physical_prm['VISCOSITY'])
 force = Constant(physical_prm['FORCE'])
-dt = Constant(physical_prm['STEP_SIZE'])
+dt = Constant(simulation_prm['STEP_SIZE'])
 height = mesh.coordinates()[:, 1].max() - mesh.coordinates()[:, 1].min()
 y = Expression('H/2 - abs(H/2 - x[1])', H=height, degree=2)
 

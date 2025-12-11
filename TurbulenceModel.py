@@ -188,6 +188,8 @@ class SpalartAllmarasGeneral:
 
     def update_variables(self, relaxation = 1.0):
         """Update nu_tilde variable with relaxation."""
+        # The assign method can handle linear combinations of Functions.
+        # This is more readable and consistent with the k-epsilon implementation.
         self._nu_tilde0.assign(relaxation * self._nu_tilde1 + (1.0 - relaxation) * self._nu_tilde0)
 
     def _construct_turbulent_quantities(self, external_u1):

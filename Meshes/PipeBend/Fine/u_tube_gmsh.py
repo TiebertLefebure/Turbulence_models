@@ -137,22 +137,23 @@ def create_fine_mesh(output_filename="u_bend_2d.msh"):
     # -----------------------------
 
     # Global mesh size bounds (in meters)
-    gmsh.option.setNumber("Mesh.MeshSizeMin", 0.05 * MM)   # Larger minimum element size
-    gmsh.option.setNumber("Mesh.MeshSizeMax", 5.0   * MM)   # 5 mm (core)
+    gmsh.option.setNumber("Mesh.MeshSizeMin", 0.01 * MM)   # Smaller minimum element size for wall resolution
+    gmsh.option.setNumber("Mesh.MeshSizeMax", 2.0  * MM)   # 2 mm (core)
 
     # Distance field to walls
     dist = gmsh.model.mesh.field.add("Distance")
     gmsh.model.mesh.field.setNumbers(dist, "EdgesList", wall_curves)
-    gmsh.model.mesh.field.setNumber(dist, "Sampling", 100) # Reduced sampling for coarser control
+    gmsh.model.mesh.field.setNumber(dist, "Sampling", 200) # Increased sampling for finer control
 
     # Threshold field: distance -> element size
-    # h_wall ~ 0.05 mm => y+ ~ 8-9, requiring wall functions
-    h_wall = 0.05 * MM    # coarser resolution near the wall
-    h_bulk = 4.0  * MM      # much coarser elements in the core
+    # Target y+ < 5 for direct wall resolution. Aiming for y+ ~ 2-3.
+    # From analysis, y=0.018mm => y+~3. First cell height h_wall should be ~2*y.
+    h_wall = 0.02 * MM    # fine resolution near the wall (targets y+ < 3)
+    h_bulk = 2.0  * MM    # finer core elements for better transition
 
     # Refined strip thickness
-    d_min = 0.5 * MM      # up to 0.5 mm from wall
-    d_max = 5.0 * MM      # by 5.0 mm from wall
+    d_min = 0.2 * MM      # thickness of finest layer
+    d_max = 4.0 * MM      # transition to bulk mesh size over 4mm
 
     th = gmsh.model.mesh.field.add("Threshold")
     gmsh.model.mesh.field.setNumber(th, "InField",  dist)

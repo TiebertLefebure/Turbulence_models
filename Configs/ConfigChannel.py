@@ -26,13 +26,13 @@ initial_conditions = {
 boundary_conditions = {
     'INFLOW':{
         'U': None,
-        'P': 2.0,
+        'P': None, # 'P': 2.0 for K-E   'P' = None for SA
         'K': None,
         'E': None
     },
     'OUTFLOW':{
         'U': None,
-        'P': 0.0,
+        'P': None, # 'P': 0.0 for K-E   'P' = None for SA
         'K': None,
         'E': None
     },
@@ -54,8 +54,7 @@ boundary_conditions = {
 # Physical quantities
 physical_prm = {
     'VISCOSITY': 0.00181818,
-    'FORCE': (0.0, 0.0),
-    'STEP_SIZE': 0.005
+    'FORCE': (0.1, 0.0) # 'FORCE': (0.0, 0.0) for K-E   'FORCE': (0.1, 0.0) for SA
 }
 
 # Simulation parameters
@@ -63,7 +62,19 @@ simulation_prm = {
     'QUADRATURE_DEGREE': 2,
     'MAX_ITERATIONS': 3000,
     'TOLERANCE': 1e-6,
-    'CFL_RELAXATION': 0.25
+    'CFL_RELAXATION': 0.25,
+    'STEP_SIZE': 0.005
+}
+
+# Simulation parameters for SA model
+simulation_prm_SA = {
+    'QUADRATURE_DEGREE': 2,
+    'MAX_ITERATIONS': 10000,
+    'TOLERANCE': 1e-6,
+    'CFL_RELAXATION': 0.25,
+    'STEP_SIZE': 0.005,
+    'U_RELAXATION_FACTOR': 0.3,
+    'NUT_RELAXATION_FACTOR': 0.3
 }
 
 # Specify where results are saved

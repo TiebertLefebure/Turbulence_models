@@ -32,10 +32,11 @@ boundary_markers = {
 
 # Initial conditions
 initial_conditions = {
-    'U': (0.5, 0.0, 0.0), #(20.0, 0.0, 0.0)
+    'U': (0.5, 0.0, 0.0), 
     'P': 2.0,
-    'K': 0.008,  #1.5
-    'E': 0.054    #2.23
+    'K': 0.008,    
+    'E': 0.054,    
+    'NU_TILDE': 0.0
 }
 
 # Boundary conditions
@@ -44,19 +45,22 @@ boundary_conditions = {
         'U': (1.42, 0.0, 0.0), #0.0
         'P': None,  #2.0
         'K': 0.008, #None
-        'E': 0.054  #None
+        'E': 0.054,  #None
+        'NU_TILDE': 2.67e-6 # 3*ν = 2.67e-6
     },
     'OUTFLOW':{
         'U': None,
         'P': 0.0,
         'K': None,
-        'E': None
+        'E': None,
+        'NU_TILDE': None
     },
     'WALLS':{
         'U': (0.0, 0.0, 0.0),
         'P': None,
         'K': 0.0,
-        'E': 0.0
+        'E': 0.0,
+        'NU_TILDE': 0.0
     }
 }
 
@@ -83,6 +87,13 @@ saving_directory = {
     'PVD_FILES': 'Results/PipeBend/PVD files/',
     'H5_FILES':  'Results/PipeBend/H5 files/',
     'RESIDUALS': 'Results/PipeBend/Residual files/'
+}
+
+# Specify where results are saved for SA model
+saving_directory_SA = {
+    'PVD_FILES': 'Results/PipeBend_SA/PVD files/',
+    'H5_FILES':  'Results/PipeBend_SA/H5 files/',
+    'RESIDUALS': 'Results/PipeBend_SA/Residual files/'
 }
 
 # Specify what to do after simulation
